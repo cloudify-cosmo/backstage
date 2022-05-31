@@ -1,0 +1,165 @@
+tosca_definitions_version: cloudify_dsl_1_3
+description: >
+  The blueprint creates an EC2 instance with public IP on AWS.
+
+imports:
+  - https://cloudify.co/spec/cloudify/6.3.1/types.yaml
+  - plugin:cloudify-aws-plugin
+  - plugin:cloudify-utilities-plugin
+
+inputs:
+  region_name:
+    type: string
+    display_label: AWS Region Name
+    description: Select AWS region name
+    default: ca-central-1
+
+  instance_type:
+    description: Select instance size
+    type: string
+    display_label: Instance Type
+    default: t2.micro
+
+  image_id:
+    description: >
+      The map between region and image id, it is used in EC2 instance
+      to select the right image id per selected region
+    type: dict
+    default:
+      ca-central-1: ami-033e6106180a626d0
+      us-east-1: ami-03248a0341eadb1f1
+      us-west-1: ami-01dd5a8ef26e6341d
+      us-west-2: ami-024b56adf74074ca6
+      eu-west-1: ami-0eee6eb870dc1cefa
+    hidden: true
+
+  aws_credentials:
+    description: The credentials for AWS
+    type: dict
+    default:
+      aws_access_key_id: { get_secret: aws_access_key_id }
+      aws_secret_access_key: { get_secret: aws_secret_access_key }
+      region_name: { get_input: region_name }
+    hidden: true
+
+  ssh_key_secret_name:
+    description: Name of a Secret that stores SSH Key
+    type: string
+    hidden: true
+    default: ec2_ssh_key
+
+  subnet_id:
+    type: string
+    description: AWS Resource ID of the Subnet
+
+  security_group_id:
+    type: string
+    description: AWS Resource ID of the Security Group
+
+  ec2_name:
+    type: string
+    description: Name of the EC2 instance
+
+node_templates:
+  nic:
+    type: cloudify.nodes.aws.ec2.Interface
+    properties:
+      client_config: { get_input: aws_credentials }
+      resource_config:
+        kwargs:
+          Description: Created by Cloudify
+          SubnetId: { get_input: subnet_id }
+          Groups: [{ get_input: security_group_id }]
+
+  ip:
+    type: cloudify.nodes.aws.ec2.ElasticIP
+    properties:
+      client_config: { get_input: aws_credentials }
+    relationships:
+      - type: cloudify.relationships.depends_on
+        target: nic
+
+  vm_ssh_key:
+    type: cloudify.keys.nodes.RSAKey
+    properties:
+      resource_config:
+        key_name: { get_input: ssh_key_secret_name }
+        openssh_format: true
+      use_secret_store: true
+      use_secrets_if_exist: true
+    interfaces:
+      cloudify.interfaces.lifecycle:
+        create:
+          implementation: keys.cloudify_ssh_key.operations.create
+          inputs:
+            store_private_key_material: true
+
+  cloud_init:
+    type: cloudify.nodes.CloudInit.CloudConfig
+    properties:
+      resource_config:
+        users:
+          - name: centos
+            shell: /bin/bash
+            sudo: ['ALL=(ALL) NOPASSWD:ALL']
+            ssh-authorized-keys:
+              - { get_attribute: [vm_ssh_key, public_key_export] }
+    relationships:
+      - type: cloudify.relationships.depends_on
+        target: vm_ssh_key
+
+  vm:
+    type: cloudify.nodes.aws.ec2.Instances
+    properties:
+      client_config: { get_input: aws_credentials }
+      agent_config:
+        install_method: none
+        user: centos
+        key: { get_attribute: [vm_ssh_key, private_key_export] }
+      resource_config:
+        InstanceType: { get_input: instance_type }
+        ImageId: { get_input: [image_id, { get_input: region_name }] }
+        kwargs:
+          UserData: { get_attribute: [cloud_init, cloud_config] }
+          BlockDeviceMappings:
+            - DeviceName: '/dev/sda1'
+              Ebs:
+                VolumeSize: 20
+          TagSpecifications:
+            - ResourceType: instance
+              Tags:
+                - Key: Name
+                  Value: { get_input: ec2_name }
+      use_public_ip: true
+      cloudify_tagging: false
+    relationships:
+      - type: cloudify.relationships.depends_on
+        target: vm_ssh_key
+      - type: cloudify.relationships.depends_on
+        target: cloud_init
+      - type: cloudify.relationships.depends_on
+        target: nic
+      - type: cloudify.relationships.depends_on
+        target: ip
+
+labels:
+  obj-type:
+    values:
+      - aws
+
+capabilities:
+  public_ip:
+    description: The public ip of the EC2 instance
+    value: { get_attribute: [vm, public_ip_address] }
+
+  private_ip:
+    description: The private ip of the EC2 instance
+    value: { get_attribute: [vm, private_ip_address] }
+
+  private_key:
+    description: The private key for the EC2 instance
+    value: { get_attribute: [vm_ssh_key, private_key_export] }
+
+  public_key:
+    description: The private key for the EC2 instance
+    value: { get_attribute: [vm_ssh_key, public_key_export] }

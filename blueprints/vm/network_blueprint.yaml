@@ -1,0 +1,174 @@
+tosca_definitions_version: cloudify_dsl_1_3
+description: >
+  The blueprint creates VPC and all necessary network resources on AWS
+  in order to spin up EC2 instances.
+
+imports:
+  - https://cloudify.co/spec/cloudify/6.3.1/types.yaml
+  - plugin:cloudify-aws-plugin
+  - plugin:cloudify-utilities-plugin
+
+inputs:
+  region_name:
+    type: string
+    display_label: AWS Region Name
+    description: Select AWS region name
+    default: ca-central-1
+
+  aws_credentials:
+    description: The credentials for AWS
+    type: dict
+    default:
+      aws_access_key_id: { get_secret: aws_access_key_id }
+      aws_secret_access_key: { get_secret: aws_secret_access_key }
+      region_name: { get_input: region_name }
+    hidden: true
+
+node_templates:
+  vpc:
+    type: cloudify.nodes.aws.ec2.Vpc
+    properties:
+      client_config: { get_input: aws_credentials }
+      resource_config:
+        CidrBlock: 10.10.0.0/16
+    #   Tags:
+    #     - Key: Name
+    #       Value: backstage-vpc
+    # interfaces:
+    #   cloudify.interfaces.lifecycle:
+    #     configure:
+    #       implementation: aws.cloudify_aws.ec2.resources.vpc.create
+    #       inputs:
+    #         modify_vpc_attribute_args:
+    #           EnableDnsHostnames:
+    #             Value: True
+
+  internet_gateway:
+    type: cloudify.nodes.aws.ec2.InternetGateway
+    properties:
+      client_config: { get_input: aws_credentials }
+    relationships:
+      - type: cloudify.relationships.connected_to
+        target: vpc
+
+  subnet:
+    type: cloudify.nodes.aws.ec2.Subnet
+    properties:
+      client_config: { get_input: aws_credentials }
+      resource_config:
+        CidrBlock: 10.10.0.0/24
+        AvailabilityZone: { concat: [{ get_input: region_name }, "a"] }
+    relationships:
+      - type: cloudify.relationships.depends_on
+        target: vpc
+
+  routetable:
+    type: cloudify.nodes.aws.ec2.RouteTable
+    properties:
+      client_config: { get_input: aws_credentials }
+    relationships:
+      - type: cloudify.relationships.contained_in
+        target: vpc
+      - type: cloudify.relationships.connected_to
+        target: subnet
+
+  route_public_subnet_internet_gateway:
+    type: cloudify.nodes.aws.ec2.Route
+    properties:
+      resource_config:
+        kwargs:
+          DestinationCidrBlock: "0.0.0.0/0"
+      client_config: { get_input: aws_credentials }
+    relationships:
+      - type: cloudify.relationships.contained_in
+        target: routetable
+      - type: cloudify.relationships.connected_to
+        target: internet_gateway
+    interfaces:
+      cloudify.interfaces.lifecycle:
+        stop: {}
+
+  security_group:
+    type: cloudify.nodes.aws.ec2.SecurityGroup
+    properties:
+      client_config: { get_input: aws_credentials }
+      resource_config:
+        GroupName: security_group_cloudify
+        Description: Created by Cloudify
+        VpcId: { get_attribute: [vpc, aws_resource_id] }
+    relationships:
+      - type: cloudify.relationships.depends_on
+        target: vpc
+
+  security_group_rules:
+    type: cloudify.nodes.aws.ec2.SecurityGroupRuleIngress
+    properties:
+      client_config: { get_input: aws_credentials }
+      resource_config:
+        IpPermissions:
+          - IpProtocol: icmp
+            FromPort: -1
+            ToPort: -1
+            IpRanges:
+              - CidrIp: 0.0.0.0/0
+          - IpProtocol: tcp
+            FromPort: 22
+            ToPort: 22
+            IpRanges:
+              - CidrIp: 0.0.0.0/0
+          - IpProtocol: tcp
+            FromPort: 80
+            ToPort: 80
+            IpRanges:
+              - CidrIp: 0.0.0.0/0
+          - IpProtocol: tcp
+            FromPort: 443
+            ToPort: 443
+            IpRanges:
+              - CidrIp: 0.0.0.0/0
+          - IpProtocol: tcp
+            FromPort: 5432
+            ToPort: 5432
+            IpRanges:
+              - CidrIp: 0.0.0.0/0
+          - IpProtocol: tcp
+            FromPort: 5671
+            ToPort: 5671
+            IpRanges:
+              - CidrIp: 0.0.0.0/0
+          - IpProtocol: tcp
+            FromPort: 7007
+            ToPort: 7007
+            IpRanges:
+              - CidrIp: 0.0.0.0/0
+          - IpProtocol: tcp
+            FromPort: 8000
+            ToPort: 8000
+            IpRanges:
+              - CidrIp: 0.0.0.0/0
+          - IpProtocol: tcp
+            FromPort: 53333
+            ToPort: 53333
+            IpRanges:
+              - CidrIp: 0.0.0.0/0
+    relationships:
+      - type: cloudify.relationships.contained_in
+        target: security_group
+
+labels:
+  obj-type:
+    values:
+      - aws
+
+capabilities:
+  subnet_id:
+    description: AWS Resource ID of the Subnet
+    value: { get_attribute: [subnet, aws_resource_id] }
+
+  security_group_id:
+    description: AWS Resource ID of the Security Group
+    value: { get_attribute: [security_group, aws_resource_id] }
+
+  vpc_id:
+    description: AWS Resource ID of the VPC
+    value: { get_attribute: [vpc, aws_resource_id] }
