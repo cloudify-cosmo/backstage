@@ -15,6 +15,9 @@ rm -f ~/backstage-cloudify-plugin.zip
 sed "s+\${CLOUDIFY_MANAGER_IP}+${CLOUDIFY_MANAGER_IP}+g" -i ${INSTALL_DIR}/plugins/cloudify/src/components/BlueprintsComponent/BlueprintsComponent.tsx
 sed "s+\${BACKSTAGE_BACKEND_IP}+${BACKSTAGE_BACKEND_IP}+g" -i ${INSTALL_DIR}/plugins/cloudify/src/components/BlueprintsComponent/BlueprintsComponent.tsx
 
+sed "s+\${CLOUDIFY_MANAGER_IP}+${CLOUDIFY_MANAGER_IP}+g" -i ${INSTALL_DIR}/plugins/cloudify/src/components/DeploymentsComponent/DeploymentsComponent.tsx
+sed "s+\${BACKSTAGE_BACKEND_IP}+${BACKSTAGE_BACKEND_IP}+g" -i ${INSTALL_DIR}/plugins/cloudify/src/components/DeploymentsComponent/DeploymentsComponent.tsx
+
 sed "s+.addRouter('', await app(appEnv));+.addRouter('', await app(appEnv))+g" -i ${INSTALL_DIR}/packages/backend/src/index.ts
 sed -i "163i\    .addRouter('/proxy', await proxy(proxyEnv));" ${INSTALL_DIR}/packages/backend/src/index.ts
 

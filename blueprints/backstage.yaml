@@ -330,6 +330,10 @@ node_templates:
                     - public_ip
                 PORT: { get_input: port }
                 GITHUB_TOKEN: { get_secret: github_token }
+                AWS_ACCESS_KEY_ID_DEV: { get_secret: aws_access_key_id_dev }
+                AWS_SECRET_ACCESS_KEY_DEV: { get_secret: aws_secret_access_key_dev }
+                AWS_ACCESS_KEY_ID_PROD: { get_secret: aws_access_key_id_prod }
+                AWS_SECRET_ACCESS_KEY_PROD: { get_secret: aws_secret_access_key_prod }
                 BACKSTAGE_ENTITIES_REPO_URL:
                   get_input: backstage_entities_repo_url
         start:

@@ -9,6 +9,10 @@ blueprint, setup the following secrets in your Cloudify Manager:
  - _LICENSE_ - with the contents of a valid Cloudify license used for Cloudify Manager
  - _aws_access_key_id_ - Access Key ID of your AWS account
  - _aws_secret_access_key_ - Secret Access Key of your AWS account
+ - _aws_access_key_id_dev_ - Access Key ID of your dev AWS account with [AWS Cost Explorer permissions](https://github.com/backstage/backstage/blob/master/plugins/cost-insights/contrib/aws-cost-explorer-api.md#authentication) 
+ - _aws_secret_access_key_dev_ - Secret Access Key of your dev AWS account with [AWS Cost Explorer permissions](https://github.com/backstage/backstage/blob/master/plugins/cost-insights/contrib/aws-cost-explorer-api.md#authentication) 
+ - _aws_access_key_id_prod_ - Access Key ID of your prod AWS account with [AWS Cost Explorer permissions](https://github.com/backstage/backstage/blob/master/plugins/cost-insights/contrib/aws-cost-explorer-api.md#authentication) 
+ - _aws_secret_access_key_prod_ - Secret Access Key of your prod AWS account with [AWS Cost Explorer permissions](https://github.com/backstage/backstage/blob/master/plugins/cost-insights/contrib/aws-cost-explorer-api.md#authentication) 
  - _github_token_ - GitHub Token generated for your GitHub user
  - _github_username_ - your GitHub account user name
  - _postgres_password_ - password that will be used for PostgreSQL database

@@ -5,20 +5,20 @@ set -e
 
 export PYTHONPATH='/opt/cfy/lib/python3.6/site-packages:'$PYTHONPATH
 
-AWS_WAGON_URL='http://repository.cloudifysource.org/cloudify/wagons/cloudify-aws-plugin/latest/cloudify_aws_plugin-3.0.5-centos-Core-py36-none-linux_x86_64.wgn'
-AWS_PLUGIN_YAML_URL='http://repository.cloudifysource.org/cloudify/wagons/cloudify-aws-plugin/latest/v2_plugin.yaml'
+AWS_WAGON_URL='http://repository.cloudifysource.org/cloudify/wagons/cloudify-aws-plugin/3.0.5/cloudify_aws_plugin-3.0.5-centos-Core-py36-none-linux_x86_64.wgn'
+AWS_PLUGIN_YAML_URL='http://repository.cloudifysource.org/cloudify/wagons/cloudify-aws-plugin/3.0.5/plugin.yaml'
 GCP_WAGON_URL='http://repository.cloudifysource.org/cloudify/wagons/cloudify-gcp-plugin/1.8.1/cloudify_gcp_plugin-1.8.1-centos-Core-py36-none-linux_x86_64.wgn'
 GCP_PLUGIN_YAML_URL='http://repository.cloudifysource.org/cloudify/wagons/cloudify-gcp-plugin/1.8.1/plugin.yaml'
 TERRAFORM_WAGON_URL='https://github.com/cloudify-cosmo/cloudify-terraform-plugin/releases/download/0.18.17/cloudify_terraform_plugin-0.18.17-centos-Core-py36-none-linux_x86_64.wgn'
 TERRAFORM_PLUGIN_YAML_URL='https://github.com/cloudify-cosmo/cloudify-terraform-plugin/releases/download/0.18.17/plugin.yaml'
-ANSIBLE_WAGON_URL='http://repository.cloudifysource.org/cloudify/wagons/cloudify-ansible-plugin/latest/cloudify_ansible_plugin-2.13.7-centos-Core-py36-none-linux_x86_64.wgn'
-ANSIBLE_PLUGIN_YAML_URL='http://repository.cloudifysource.org/cloudify/wagons/cloudify-ansible-plugin/latest/v2_plugin.yaml'
+ANSIBLE_WAGON_URL='http://repository.cloudifysource.org/cloudify/wagons/cloudify-ansible-plugin/2.13.7/cloudify_ansible_plugin-2.13.7-centos-Core-py36-none-linux_x86_64.wgn'
+ANSIBLE_PLUGIN_YAML_URL='http://repository.cloudifysource.org/cloudify/wagons/cloudify-ansible-plugin/2.13.7/plugin.yaml'
 DOCKER_WAGON_URL='http://repository.cloudifysource.org/cloudify/wagons/cloudify-docker-plugin/2.0.5/cloudify_docker_plugin-2.0.5-centos-Core-py36-none-linux_x86_64.wgn'
-DOCKER_PLUGIN_YAML_URL='http://repository.cloudifysource.org/cloudify/wagons/cloudify-docker-plugin/2.0.5/v2_plugin.yaml'
+DOCKER_PLUGIN_YAML_URL='http://repository.cloudifysource.org/cloudify/wagons/cloudify-docker-plugin/2.0.5/plugin.yaml'
 FABRIC_WAGON_URL='http://repository.cloudifysource.org/cloudify/wagons/cloudify-fabric-plugin/2.0.13/cloudify_fabric_plugin-2.0.13-centos-Core-py36-none-linux_aarch64.wgn'
 FABRIC_PLUGIN_YAML_URL='http://repository.cloudifysource.org/cloudify/wagons/cloudify-fabric-plugin/2.0.13/plugin.yaml'
-UTILITIES_WAGON_URL='http://repository.cloudifysource.org/cloudify/wagons/cloudify-utilities-plugin/latest/cloudify_utilities_plugin-1.25.7-centos-Core-py36-none-linux_x86_64.wgn'
-UTILITIES_PLUGIN_YAML_URL='http://repository.cloudifysource.org/cloudify/wagons/cloudify-utilities-plugin/latest/v2_plugin.yaml'
+UTILITIES_WAGON_URL='http://repository.cloudifysource.org/cloudify/wagons/cloudify-utilities-plugin/1.25.7/cloudify_utilities_plugin-1.25.7-centos-Core-py36-none-linux_x86_64.wgn'
+UTILITIES_PLUGIN_YAML_URL='http://repository.cloudifysource.org/cloudify/wagons/cloudify-utilities-plugin/1.25.7/plugin.yaml'
 
 TERRAFORM_REPO_URL='https://github.com/Cloudify-PS/wwt-tf-templates/archive/refs/heads/master.zip'
 EAAS_POC_ZIP_URL='https://github.com/Cloudify-PS/wwt-eaas-poc/archive/refs/heads/main.zip'
